@@ -31,6 +31,9 @@ class Product:
         self.comments = comments
         self.makers = makers
 
+    def to_json(self):
+        return json.dumps(self.__dict__)
+
 
 def get_today_date():
     """ Returns the today's date at %Y/%m/%d format. """
@@ -106,7 +109,7 @@ def get_product_information(product_url):
             product_category=product_category,
             comments=comments,
             makers=makers
-        )
+        ).to_json()
     except KeyError:
         return 0
 
@@ -122,3 +125,35 @@ def get_products_of_the_day(date=False):
         product_data.append(get_product_information(product_url))
 
     return product_data
+
+
+def read_json_input(json_input):
+    """ Reads the json input and returns dates. """
+    data = json.loads(json_input)
+
+    return data['dates']
+
+
+def run_scraper(json_input, visualize=False):
+
+    dates = read_json_input(json_input)
+
+    output = False
+    if isinstance(dates, list):
+        output = []
+        for date in dates:
+            output.append(get_products_of_the_day(date))
+    elif isinstance(dates, str):
+        output = get_products_of_the_day(dates)
+
+    if visualize:
+        for product in output:
+            print(product)
+
+    return output
+
+
+if __name__ == "__main__":
+    json_input = '{"dates":"2023/08/15"}'
+    json_input_list = '{"dates":["2023/08/15", "2023/08/14", "2023/08/13"]}'
+    run_scraper(json_input, visualize=True)
